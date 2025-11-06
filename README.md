@@ -12,7 +12,7 @@
 
 You can view the live simulator hosted on GitHub Pages here:
 
-**[https://<YOUR-USERNAME>.github.io/<YOUR-REPOSITORY-NAME>/](https://jeyadev-jd.github.io/Quantum-Teleportation-Simulation/)**
+**[https://jeyadev-jd.github.io/Quantum-Teleportation-Simulation/])**
 
 *(Follow the deployment instructions below to get your own live version!)*
 
