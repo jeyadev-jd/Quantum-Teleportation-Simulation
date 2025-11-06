@@ -46,32 +46,6 @@ Users can select an initial quantum state for Alice, choose a noise model, and t
 
 ---
 
-## 🚀 How to Deploy on GitHub Pages
-
-You can host this simulator for free on the web in just a few minutes using GitHub Pages.
-
-1.  **Create a GitHub Repository**:
-    -   Create a new public repository on your GitHub account (e.g., `quantum-simulator`).
-
-2.  **Rename the HTML File**:
-    -   For GitHub Pages to work automatically, the main HTML file must be named `index.html`.
-    -   Rename your `Quantum Teleportation.html` file to **`index.html`**.
-
-3.  **Upload the File**:
-    -   Upload the renamed `index.html` file to your new repository.
-
-4.  **Enable GitHub Pages**:
-    -   In your repository, go to the **`Settings`** tab.
-    -   In the left sidebar, click on **`Pages`**.
-    -   Under "Build and deployment," for the "Source," select **`Deploy from a branch`**.
-    -   Under "Branch," select your main branch (usually `main` or `master`) and keep the folder as `/ (root)`.
-    -   Click **`Save`**.
-
-5.  **View Your Live Site!**
-    -   Wait a minute or two for the site to build.
-    -   Your live URL will be displayed at the top of the `Pages` settings screen. It will look like: `https://<your-username>.github.io/<your-repo-name>/`.
-
----
 
 ## 🛠️ Built With
 
