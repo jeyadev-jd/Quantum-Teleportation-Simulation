@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Teleportation - Alice & Bob Simulator with Real Pictures</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        * { font-family: 'Poppins', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); }
+
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 5px #667eea); } 50% { filter: drop-shadow(0 0 15px #667eea); } }
+
+        .float { animation: float 3s ease-in-out infinite; }
+        .pulse-animation { animation: pulse 2s ease-in-out infinite; }
+        .slide-left { animation: slideInLeft 0.6s ease-out; }
+        .slide-right { animation: slideInRight 0.6s ease-out; }
+        .glow-line { animation: glow 1.5s ease-in-out infinite; }
+
+        .person-box { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .quantum-state {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .circuit-container {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        svg { 
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .noise-model-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .noise-model-card:hover {
+            border: 2px solid rgba(102, 126, 234, 0.8);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .noise-model-card.active {
+            background: rgba(102, 126, 234, 0.3);
+            border: 2px solid #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+        }
+
+        .character-image {
+            width: 500px;
+            height: 450px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            margin: 15px auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .alice-frame {
+            border-color: rgba(102, 126, 234, 0.8);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4), 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .bob-frame {
+            border-color: rgba(245, 87, 108, 0.8);
+            box-shadow: 0 0 20px rgba(245, 87, 108, 0.4), 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .info-badge {
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.2) 0%, rgba(56, 239, 125, 0.2) 100%);
+            border: 2px solid #38ef7d;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .step-indicator {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .step-inactive { 
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .step-active { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .step-completed { 
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: 2px solid #38ef7d;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white overflow-x-hidden">
+
+    <!-- Stars Background -->
+    <div class="fixed inset-0 opacity-20">
+        <div id="stars"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10">
+
+        <!-- Header -->
+        <header class="text-center py-12 px-4">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                🚀 Quantum Teleportation
+            </h1>
+            <p class="text-xl text-gray-300 mb-2">Alice & Bob's Quantum Adventure</p>
+        </header>
+
+        <!-- Main Container -->
+        <div class="max-w-7xl mx-auto px-4 pb-12">
+
+            <!-- Noise Model Selection -->
+            <div class="mb-8">
+                <h3 class="text-lg font-bold text-cyan-300 mb-4">📊 Select Noise Model:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                    <div class="noise-model-card active" data-model="realistic">
+                        <div class="font-bold text-cyan-300 mb-1">Realistic</div>
+                        <div class="text-xs text-gray-400">Bell (5%) + Entangle (3%) + Gate (1-2%) + Channel (2%)</div>
+                        <div class="text-xs text-purple-300 mt-2">Expected: 75-88%</div>
+                    </div>
+                    <div class="noise-model-card" data-model="depolarizing">
+                        <div class="font-bold text-cyan-300 mb-1">Depolarizing</div>
+                        <div class="text-xs text-gray-400">Mixed error (λ = 8%)</div>
+                        <div class="text-xs text-purple-300 mt-2">Expected: 82-88%</div>
+                    </div>
+                    <div class="noise-model-card" data-model="amplitude">
+                        <div class="font-bold text-cyan-300 mb-1">Amplitude Damping</div>
+                        <div class="text-xs text-gray-400">Energy loss (γ = 7%)</div>
+                        <div class="text-xs text-purple-300 mt-2">Expected: 82-92%</div>
+                    </div>
+                    <div class="noise-model-card" data-model="phase">
+                        <div class="font-bold text-cyan-300 mb-1">Phase Damping</div>
+                        <div class="text-xs text-gray-400">Dephasing (λ = 4%)</div>
+                        <div class="text-xs text-purple-300 mt-2">Expected: 88-98%</div>
+                    </div>
+                    <div class="noise-model-card" data-model="ideal">
+                        <div class="font-bold text-cyan-300 mb-1">Ideal (No Noise)</div>
+                        <div class="text-xs text-gray-400">Perfect measurement</div>
+                        <div class="text-xs text-purple-300 mt-2">Expected: ~99%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animated Quantum Circuit -->
+            <div class="mb-8">
+                <h3 class="text-lg font-bold text-cyan-300 mb-4">🔬 Quantum Circuit (Animated):</h3>
+                <div class="circuit-container" style="max-height: 600px;">
+                    <svg id="quantum-circuit" width="1200" height="500" style="min-width: 1200px;"></svg>
+                </div>
+                <div class="text-sm text-gray-400 mt-3">
+                    <span id="circuit-status">Waiting for protocol to start...</span>
+                </div>
+            </div>
+
+            <!-- Alice & Bob Section WITH PICTURES -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+
+                <!-- Alice's Lab -->
+                <div class="person-box slide-left">
+                    <div class="p-8">
+                        <div class="text-center mb-6">
+                            <!-- ALICE PICTURE -->
+                            <img id="alice-picture" src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/fdf17454-0d86-49ce-b78f-3eea6f6af6ed.png" alt="Alice - Quantum Physicist" class="character-image alice-frame">
+                            <h2 class="text-2xl font-bold text-cyan-300">Alice</h2>
+                            <p class="text-sm text-gray-400">Quantum Physicist - Sender</p>
+                            <p class="text-xs text-gray-500">Initiates quantum teleportation</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="text-sm font-semibold text-gray-300">📊 Quantum State:</div>
+                            <div class="quantum-state text-center">
+                                <div class="text-2xl font-mono font-bold mb-2" id="alice-state-display">|0⟩</div>
+                                <div class="text-xs text-gray-300">P(|0⟩) = <span id="alice-p0">1.00</span></div>
+                                <div class="text-xs text-gray-300">P(|1⟩) = <span id="alice-p1">0.00</span></div>
+                            </div>
+
+                            <div class="text-sm font-semibold text-gray-300 mt-6">🎯 Select State:</div>
+                            <select id="state-select" class="w-full bg-gray-800 border-2 border-purple-500 text-white rounded-lg p-3">
+                                <option value="0">|0⟩ - Zero State</option>
+                                <option value="1">|1⟩ - One State</option>
+                                <option value="plus">|+⟩ - Superposition</option>
+                                <option value="minus">|-⟩ - Minus</option>
+                                <option value="iplus">|i+⟩ - Complex</option>
+                                <option value="iminus">|i-⟩ - Complex 2</option>
+                            </select>
+
+                            <div class="info-badge">
+                                <span class="text-sm">💡 Alice prepares and sends her quantum state across space using entanglement!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bob's Lab -->
+                <div class="person-box slide-right">
+                    <div class="p-8">
+                        <div class="text-center mb-6">
+                            <!-- BOB PICTURE -->
+                            <img id="bob-picture" src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/60b2de9d-a975-49d7-897e-0d6ba673b74d.png" alt="Bob - Quantum Engineer" class="character-image bob-frame">
+                            <h2 class="text-2xl font-bold text-pink-300">Bob</h2>
+                            <p class="text-sm text-gray-400">Quantum Engineer - Receiver</p>
+                            <p class="text-xs text-gray-500">Receives and reconstructs the state</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="text-sm font-semibold text-gray-300">📊 Received State:</div>
+                            <div class="quantum-state text-center">
+                                <div class="text-2xl font-mono font-bold mb-2" id="bob-state-display">?</div>
+                                <div class="text-xs text-gray-300">P(|0⟩) = <span id="bob-p0">0.50</span></div>
+                                <div class="text-xs text-gray-300">P(|1⟩) = <span id="bob-p1">0.50</span></div>
+                            </div>
+
+                            <div class="text-sm font-semibold text-gray-300 mt-6">📡 Status:</div>
+                            <div id="bob-status" class="text-center text-sm text-gray-400 bg-gray-900 p-3 rounded-lg">
+                                Waiting for quantum information...
+                            </div>
+
+                            <div class="info-badge">
+                                <span class="text-sm">⚡ Bob receives classical bits and reconstructs Alice's quantum state perfectly!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Metrics & Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+
+                <!-- Metrics -->
+                <div>
+                    <h3 class="text-lg font-bold text-cyan-300 mb-6">📊 Real-Time Metrics</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="feature-card">
+                            <div class="text-sm text-gray-400 mb-2">🔄 Bell State Outcome:</div>
+                            <div class="text-2xl font-mono font-bold text-purple-300" id="bell-result">|?⟩</div>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="text-sm text-gray-400 mb-2">📍 Classical Bits Transmitted:</div>
+                            <div class="text-2xl font-mono font-bold text-cyan-300" id="classical-bits">[? ?]</div>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="text-sm text-gray-400 mb-2">🎯 Teleportation Fidelity:</div>
+                            <div class="text-3xl font-mono font-bold" id="fidelity-display" style="color: #38ef7d;">---%</div>
+                            <div id="fidelity-bar" class="w-full h-3 bg-gray-800 rounded-full mt-2 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-red-500 to-green-500 transition-all duration-500" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="text-sm text-gray-400 mb-2">✓ Quantum Advantage:</div>
+                            <div id="quantum-status" class="text-lg font-bold text-yellow-300">Requires F > 66.7%</div>
+                        </div>
+
+                        <div id="error-breakdown" class="feature-card">
+                            <div class="text-sm font-bold text-purple-300 mb-2">⚠️ Error Sources:</div>
+                            <div class="text-xs text-gray-400 space-y-1" id="error-list">
+                                <div>Waiting for simulation...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div>
+                    <h3 class="text-lg font-bold text-cyan-300 mb-6">⚙️ Protocol Steps</h3>
+                    
+                    <div class="space-y-3">
+                        <div id="process-step1" class="feature-card border-2 border-purple-500">
+                            <div class="flex items-start gap-3">
+                                <div class="step-indicator step-completed">✓</div>
+                                <div>
+                                    <h4 class="font-bold text-cyan-300">Step 1: Prepare State</h4>
+                                    <p class="text-sm text-gray-400">Alice prepares quantum state</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="process-step2" class="feature-card">
+                            <div class="flex items-start gap-3">
+                                <div class="step-indicator step-inactive">2</div>
+                                <div>
+                                    <h4 class="font-bold">Create Entanglement</h4>
+                                    <p class="text-sm text-gray-400">Generate Bell pair</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="process-step3" class="feature-card">
+                            <div class="flex items-start gap-3">
+                                <div class="step-indicator step-inactive">3</div>
+                                <div>
+                                    <h4 class="font-bold">Bell Measurement</h4>
+                                    <p class="text-sm text-gray-400">Measure Alice's qubits</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="process-step4" class="feature-card">
+                            <div class="flex items-start gap-3">
+                                <div class="step-indicator step-inactive">4</div>
+                                <div>
+                                    <h4 class="font-bold">Send Classical Bits</h4>
+                                    <p class="text-sm text-gray-400">Transmit to Bob</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="process-step5" class="feature-card">
+                            <div class="flex items-start gap-3">
+                                <div class="step-indicator step-inactive">5</div>
+                                <div>
+                                    <h4 class="font-bold">Apply Correction</h4>
+                                    <p class="text-sm text-gray-400">Bob applies gate</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 flex-wrap">
+                            <button id="next-btn" class="btn-primary">▶ NEXT</button>
+                            <button id="auto-btn" class="btn-primary">⚡ AUTO RUN</button>
+                            <button id="reset-btn" class="btn-primary bg-red-600">↻ RESET</button>
+                        </div>
+
+                        <select id="speed-select" class="w-full bg-gray-800 border-2 border-purple-500 text-white rounded-lg px-3 py-2">
+                            <option value="2000">🐢 Slow (2s)</option>
+                            <option value="1000" selected>🐎 Normal (1s)</option>
+                            <option value="500">⚡ Fast (0.5s)</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Results -->
+            <div id="results-section" class="hidden">
+                <div class="success-box">
+                    <h4 class="font-bold text-green-300 mb-3 text-lg">🎉 Teleportation Complete!</h4>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm text-gray-400">Alice's Initial State</p>
+                            <p id="result-initial" class="font-mono text-lg text-cyan-300 mt-2">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">→</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Bob's Final State</p>
+                            <p id="result-final" class="font-mono text-lg text-green-300 mt-2">-</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <p class="text-sm text-gray-400">Teleportation Fidelity</p>
+                        <p id="result-fidelity" class="font-mono text-4xl font-bold text-green-300 mt-2">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Educational Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                <div class="feature-card">
+                    <h3 class="text-cyan-300 font-bold mb-3">❓ What is Quantum Teleportation?</h3>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>✓ <strong>Entanglement</strong> (quantum connection)</li>
+                        <li>✓ <strong>Bell measurement</strong> (quantum measurement)</li>
+                        <li>✓ <strong>Classical bits</strong> (2 bits sent)</li>
+                        <li>✓ <strong>Quantum gates</strong> (correction)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="text-cyan-300 font-bold mb-3">⚡ Why Does It Matter?</h3>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>✓ Quantum networks & internet</li>
+                        <li>✓ Distributed quantum computing</li>
+                        <li>✓ Quantum key distribution</li>
+                        <li>✓ Long-distance quantum communication</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="text-cyan-300 font-bold mb-3">🔬 Does It Violate Relativity?</h3>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>✓ 2 classical bits at light speed</li>
+                        <li>✓ No FTL communication</li>
+                        <li>✓ Only state pattern transferred</li>
+                        <li>✓ No cloning (original destroyed)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="text-cyan-300 font-bold mb-3">📈 Fidelity & Success Rate</h3>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>✓ Entanglement quality: 97-99%</li>
+                        <li>✓ Measurement accuracy: 95%+</li>
+                        <li>✓ Gate fidelity: 98-99%</li>
+                        <li>✓ Current best: 86-92%</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const SQRT2_INV = 1 / Math.sqrt(2);
+        
+        const PRESET_STATES = {
+            '0': { alpha: {r: 1, i: 0}, beta: {r: 0, i: 0}, theta: 0, phi: 0, name: '|0⟩' },
+            '1': { alpha: {r: 0, i: 0}, beta: {r: 1, i: 0}, theta: Math.PI, phi: 0, name: '|1⟩' },
+            'plus': { alpha: {r: SQRT2_INV, i: 0}, beta: {r: SQRT2_INV, i: 0}, theta: Math.PI / 2, phi: 0, name: '|+⟩' },
+            'minus': { alpha: {r: SQRT2_INV, i: 0}, beta: {r: -SQRT2_INV, i: 0}, theta: Math.PI / 2, phi: Math.PI, name: '|-⟩' },
+            'iplus': { alpha: {r: SQRT2_INV, i: 0}, beta: {r: 0, i: SQRT2_INV}, theta: Math.PI / 2, phi: Math.PI / 2, name: '|i+⟩' },
+            'iminus': { alpha: {r: SQRT2_INV, i: 0}, beta: {r: 0, i: -SQRT2_INV}, theta: Math.PI / 2, phi: -Math.PI / 2, name: '|i-⟩' }
+        };
+
+        let state = {
+            phase: 0,
+            initialState: PRESET_STATES['0'],
+            bobState: PRESET_STATES['0'],
+            measuredBits: [null, null],
+            bellState: '|?⟩',
+            fidelity: 0,
+            isRunning: false,
+            speed: 1000,
+            noiseModel: 'realistic'
+        };
+
+        const PHASE_DESCRIPTIONS = [
+            "Select initial state",
+            "Creating entanglement (Bell pair)",
+            "Bell measurement (Alice measures qubits)",
+            "Sending classical bits to Bob",
+            "Bob applies quantum gate correction",
+            "Teleportation complete!"
+        ];
+
+        // ===== QUANTUM CIRCUIT VISUALIZATION =====
+        function drawQuantumCircuit(phase) {
+            const svg = document.getElementById('quantum-circuit');
+            svg.innerHTML = '';
+
+            const width = 1200;
+            const height = 500;
+            const margin = 50;
+            const qLineSpacing = 120;
+
+            // Background
+            svg.innerHTML += `<rect width="${width}" height="${height}" fill="rgba(0,0,0,0.3)" rx="10"/>`;
+
+            // Labels
+            const labels = ['Alice Qubit 1', 'Alice Qubit 2', 'Bob Qubit (Shared)'];
+            labels.forEach((label, i) => {
+                svg.innerHTML += `<text x="10" y="${margin + i * qLineSpacing + 10}" fill="#667eea" font-size="14" font-weight="bold">${label}</text>`;
+            });
+
+            // Quantum lines
+            let xPos = 120;
+            for (let i = 0; i < 3; i++) {
+                const y = margin + i * qLineSpacing;
+                svg.innerHTML += `<line x1="120" y1="${y}" x2="1150" y2="${y}" stroke="#667eea" stroke-width="2" stroke-dasharray="5,5" opacity="0.5"/>`;
+            }
+
+            // STEP 1: Initial State
+            if (phase >= 1) {
+                xPos = 150;
+                svg.innerHTML += `<circle cx="${xPos}" cy="${margin}" r="15" fill="#38ef7d" class="pulse-gate"/>`;
+                svg.innerHTML += `<text x="${xPos - 8}" y="${margin + 5}" fill="white" font-size="14" font-weight="bold">|ψ⟩</text>`;
+                svg.innerHTML += `<text x="${xPos - 30}" y="${margin + 50}" fill="#38ef7d" font-size="12">Init State</text>`;
+            }
+
+            // STEP 2: Hadamard Gate
+            if (phase >= 1) {
+                xPos = 280;
+                svg.innerHTML += `<rect x="${xPos - 15}" y="${margin - 15}" width="30" height="30" fill="rgba(102,126,234,0.5)" stroke="#667eea" stroke-width="2" rx="3" class="glow-line"/>`;
+                svg.innerHTML += `<text x="${xPos - 5}" y="${margin + 8}" fill="white" font-size="14" font-weight="bold">H</text>`;
+                svg.innerHTML += `<text x="${xPos - 30}" y="${margin + 50}" fill="#667eea" font-size="12">Hadamard</text>`;
+            }
+
+            // STEP 2: CNot Gate
+            if (phase >= 2) {
+                xPos = 380;
+                svg.innerHTML += `<circle cx="${xPos}" cy="${margin}" r="8" fill="none" stroke="#f59e0b" stroke-width="2" class="glow-line"/>`;
+                svg.innerHTML += `<circle cx="${xPos}" cy="${margin + qLineSpacing}" r="12" fill="none" stroke="#f59e0b" stroke-width="2" class="glow-line"/>`;
+                svg.innerHTML += `<line x1="${xPos}" y1="${margin + 8}" x2="${xPos}" y2="${margin + qLineSpacing - 12}" stroke="#f59e0b" stroke-width="2" class="glow-line"/>`;
+                svg.innerHTML += `<text x="${xPos - 30}" y="${margin + qLineSpacing + 50}" fill="#f59e0b" font-size="12">CNOT Gate</text>`;
+            }
+
+            // STEP 3: Bell Measurement
+            if (phase >= 3) {
+                xPos = 520;
+                svg.innerHTML += `<rect x="${xPos - 15}" y="${margin - 15}" width="30" height="30" fill="rgba(245,87,108,0.5)" stroke="#f5576c" stroke-width="2" rx="3" class="glow-line"/>`;
+                svg.innerHTML += `<text x="${xPos - 8}" y="${margin + 8}" fill="white" font-size="16" font-weight="bold">M</text>`;
+                
+                svg.innerHTML += `<rect x="${xPos - 15}" y="${margin + qLineSpacing - 15}" width="30" height="30" fill="rgba(245,87,108,0.5)" stroke="#f5576c" stroke-width="2" rx="3" class="glow-line"/>`;
+                svg.innerHTML += `<text x="${xPos - 8}" y="${margin + qLineSpacing + 8}" fill="white" font-size="16" font-weight="bold">M</text>`;
+                
+                svg.innerHTML += `<text x="${xPos - 30}" y="${margin + qLineSpacing + 100}" fill="#f5576c" font-size="12">Bell Measure</text>`;
+            }
+
+            // STEP 4: Classical Communication
+            if (phase >= 4) {
+                xPos = 680;
+                svg.innerHTML += `<g class="glow-line">`;
+                svg.innerHTML += `<rect x="${xPos - 15}" y="${margin + qLineSpacing + 30}" width="30" height="15" fill="rgba(102,126,234,0.5)" stroke="#667eea" stroke-width="2"/>`;
+                svg.innerHTML += `<text x="${xPos - 10}" y="${margin + qLineSpacing + 42}" fill="white" font-size="12" font-weight="bold">${state.measuredBits[0]}</text>`;
+                svg.innerHTML += `</g>`;
+                
+                svg.innerHTML += `<g class="glow-line">`;
+                svg.innerHTML += `<rect x="${xPos - 15}" y="${margin + qLineSpacing + 50}" width="30" height="15" fill="rgba(102,126,234,0.5)" stroke="#667eea" stroke-width="2"/>`;
+                svg.innerHTML += `<text x="${xPos - 10}" y="${margin + qLineSpacing + 62}" fill="white" font-size="12" font-weight="bold">${state.measuredBits[1]}</text>`;
+                svg.innerHTML += `</g>`;
+                
+                svg.innerHTML += `<path d="M ${xPos + 20} ${margin + qLineSpacing + 45} L ${xPos + 80} ${margin + qLineSpacing + 45}" stroke="#11998e" stroke-width="3" fill="none" marker-end="url(#arrowhead)" class="glow-line" stroke-dasharray="10,5"/>`;
+                svg.innerHTML += `<text x="${xPos + 30}" y="${margin + qLineSpacing + 70}" fill="#11998e" font-size="12">Classical</text>`;
+            }
+
+            // STEP 5: Quantum Gate
+            if (phase >= 5) {
+                xPos = 900;
+                let gateLabel = 'I';
+                let gateColor = '#38ef7d';
+                
+                if (state.measuredBits[0] === 1) gateLabel = 'Z';
+                if (state.measuredBits[1] === 1) gateLabel = gateLabel === 'Z' ? 'ZX' : 'X';
+                if (gateLabel === 'I') gateColor = '#38ef7d';
+                else if (gateLabel === 'Z') gateColor = '#f59e0b';
+                else if (gateLabel === 'X') gateColor = '#f5576c';
+                else gateColor = '#ff6b9d';
+
+                svg.innerHTML += `<rect x="${xPos - 20}" y="${margin + qLineSpacing * 2 - 20}" width="40" height="40" fill="rgba(56,239,125,0.3)" stroke="${gateColor}" stroke-width="3" rx="5" class="glow-line"/>`;
+                svg.innerHTML += `<text x="${xPos - 12}" y="${margin + qLineSpacing * 2 + 12}" fill="white" font-size="16" font-weight="bold">${gateLabel}</text>`;
+                svg.innerHTML += `<text x="${xPos - 35}" y="${margin + qLineSpacing * 2 + 60}" fill="${gateColor}" font-size="12">Gate</text>`;
+            }
+
+            // STEP 6: Output
+            if (phase >= 5) {
+                xPos = 1050;
+                svg.innerHTML += `<circle cx="${xPos}" cy="${margin + qLineSpacing * 2}" r="15" fill="#38ef7d" class="pulse-gate"/>`;
+                svg.innerHTML += `<text x="${xPos - 8}" y="${margin + qLineSpacing * 2 + 5}" fill="black" font-size="14" font-weight="bold">|ψ'⟩</text>`;
+                svg.innerHTML += `<text x="${xPos - 30}" y="${margin + qLineSpacing * 2 + 50}" fill="#38ef7d" font-size="12">Output</text>`;
+            }
+
+            svg.innerHTML += `<defs><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#11998e" /></marker></defs>`;
+
+            const stepText = PHASE_DESCRIPTIONS[phase] || "Complete";
+            svg.innerHTML += `<text x="${width / 2}" y="${height - 20}" fill="#667eea" font-size="14" text-anchor="middle" font-weight="bold">STEP ${phase}: ${stepText}</text>`;
+        }
+
+        // ===== FIDELITY CALCULATION =====
+        function calculateFidelity() {
+            const model = state.noiseModel;
+            let fidelity = 1.0;
+
+            if (model === 'realistic') {
+                const bellMeasureError = 0.05;
+                const entanglementError = 0.03;
+                let feedForwardError = 0.01;
+                if (state.measuredBits[0] === 1) feedForwardError += 0.01;
+                if (state.measuredBits[1] === 1) feedForwardError += 0.01;
+                const channelDecoherence = 0.02;
+                
+                const totalError = bellMeasureError + entanglementError + feedForwardError + channelDecoherence;
+                fidelity = Math.max(0.55, 1.0 - totalError);
+                fidelity += (Math.random() - 0.5) * 0.04;
+                
+            } else if (model === 'depolarizing') {
+                const depolarizingRate = 0.08;
+                const baseFidelity = 1.0 - (2.0 * depolarizingRate / 3.0);
+                fidelity = baseFidelity + (Math.random() - 0.5) * 0.05;
+                
+            } else if (model === 'amplitude') {
+                const dampingRate = 0.07;
+                fidelity = 1.0 - dampingRate + (Math.random() - 0.5) * 0.04;
+                
+            } else if (model === 'phase') {
+                const dephaseRate = 0.04;
+                fidelity = 1.0 - (dephaseRate / 2.0) + (Math.random() - 0.5) * 0.03;
+                
+            } else if (model === 'ideal') {
+                fidelity = 0.99;
+            }
+
+            return Math.max(0.5, Math.min(1.0, fidelity));
+        }
+
+        function getErrorBreakdown() {
+            const model = state.noiseModel;
+            let breakdown = {};
+
+            if (model === 'realistic') {
+                breakdown = {
+                    'Bell Measurement': '5%',
+                    'Entanglement': '3%',
+                    'Feed-Forward Gates': (state.measuredBits[0] ? 1 : 0) + (state.measuredBits[1] ? 1 : 0) + 1 + '%',
+                    'Channel': '2%'
+                };
+            } else if (model === 'depolarizing') {
+                breakdown = { 'Depolarizing': '8%', 'Expected': '~85%' };
+            } else if (model === 'amplitude') {
+                breakdown = { 'Amplitude Damping': '7%', 'Expected': '~88%' };
+            } else if (model === 'phase') {
+                breakdown = { 'Phase Damping': '4%', 'Expected': '~94%' };
+            } else {
+                breakdown = { 'Measurement': '1%', 'Expected': '~99%' };
+            }
+
+            return breakdown;
+        }
+
+        // ===== STATE FUNCTIONS =====
+        function handleStateChange() {
+            const stateKey = document.getElementById('state-select').value;
+            state.initialState = { ...PRESET_STATES[stateKey] };
+            updateDisplay();
+        }
+
+        function onNext() {
+            if (state.phase >= 5) return;
+            state.phase++;
+            runPhase(state.phase);
+            updateDisplay();
+        }
+
+        function runPhase(phase) {
+            switch (phase) {
+                case 2:
+                    break;
+                case 3:
+                    const outcome = Math.floor(Math.random() * 4);
+                    const bellMap = [
+                        { bits: [0, 0], state: '|Φ⁺⟩' },
+                        { bits: [1, 0], state: '|Φ⁻⟩' },
+                        { bits: [0, 1], state: '|Ψ⁺⟩' },
+                        { bits: [1, 1], state: '|Ψ⁻⟩' }
+                    ];
+                    state.measuredBits = bellMap[outcome].bits;
+                    state.bellState = bellMap[outcome].state;
+                    break;
+                case 5:
+                    state.bobState = { ...state.initialState };
+                    state.fidelity = calculateFidelity();
+                    document.getElementById('results-section').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        function updateDisplay() {
+            const phase = state.phase;
+            
+            drawQuantumCircuit(phase);
+            document.getElementById('circuit-status').textContent = `Step ${phase}: ${PHASE_DESCRIPTIONS[phase]}`;
+
+            // Update process steps
+            for (let i = 1; i <= 5; i++) {
+                const elem = document.getElementById(`process-step${i}`);
+                const indicator = elem.querySelector('.step-indicator');
+                if (i < phase) {
+                    elem.classList.add('border-green-500');
+                    indicator.className = 'step-indicator step-completed';
+                } else if (i === phase) {
+                    elem.classList.add('border-purple-500', 'border-2');
+                    indicator.className = 'step-indicator step-active';
+                } else {
+                    elem.classList.remove('border-green-500', 'border-purple-500', 'border-2');
+                    indicator.className = 'step-indicator step-inactive';
+                }
+            }
+
+            const p0 = state.initialState.alpha.r ** 2 + state.initialState.alpha.i ** 2;
+            const p1 = 1 - p0;
+            document.getElementById('alice-state-display').textContent = state.initialState.name;
+            document.getElementById('alice-p0').textContent = p0.toFixed(2);
+            document.getElementById('alice-p1').textContent = p1.toFixed(2);
+
+            if (phase < 5) {
+                document.getElementById('bob-state-display').textContent = '?';
+                document.getElementById('bob-p0').textContent = '0.50';
+                document.getElementById('bob-p1').textContent = '0.50';
+                document.getElementById('bob-status').textContent = 'Waiting for quantum information...';
+            } else {
+                const bobP0 = state.bobState.alpha.r ** 2 + state.bobState.alpha.i ** 2;
+                const bobP1 = 1 - bobP0;
+                document.getElementById('bob-state-display').textContent = state.bobState.name;
+                document.getElementById('bob-p0').textContent = bobP0.toFixed(2);
+                document.getElementById('bob-p1').textContent = bobP1.toFixed(2);
+                document.getElementById('bob-status').textContent = '✓ State received successfully!';
+            }
+
+            document.getElementById('bell-result').textContent = state.bellState;
+            const bitText = `[${state.measuredBits[0] ?? '?'} ${state.measuredBits[1] ?? '?'}]`;
+            document.getElementById('classical-bits').textContent = bitText;
+
+            const breakdown = getErrorBreakdown();
+            let errorHtml = '';
+            for (const [key, val] of Object.entries(breakdown)) {
+                errorHtml += `<div>${key}: <span class="text-yellow-300">${val}</span></div>`;
+            }
+            document.getElementById('error-list').innerHTML = errorHtml || 'N/A';
+
+            if (phase >= 5) {
+                const fidPercent = (state.fidelity * 100).toFixed(1);
+                document.getElementById('fidelity-display').textContent = fidPercent + '%';
+                document.querySelector('#fidelity-bar > div').style.width = fidPercent + '%';
+                
+                const color = state.fidelity > 0.90 ? '#38ef7d' : (state.fidelity > 0.75 ? '#f59e0b' : '#ef4444');
+                document.getElementById('fidelity-display').style.color = color;
+                
+                const status = state.fidelity > 0.667 ? '✓ QUANTUM ADVANTAGE!' : '⚠ Classical';
+                const statusColor = state.fidelity > 0.667 ? 'text-green-400' : 'text-yellow-400';
+                document.getElementById('quantum-status').textContent = status;
+                document.getElementById('quantum-status').className = 'text-lg font-bold ' + statusColor;
+                
+                document.getElementById('result-initial').textContent = state.initialState.name;
+                document.getElementById('result-final').textContent = state.bobState.name;
+                document.getElementById('result-fidelity').textContent = fidPercent + '%';
+            }
+
+            document.getElementById('next-btn').disabled = phase >= 5 || state.isRunning;
+        }
+
+        async function onAuto() {
+            if (state.isRunning) return;
+            state.isRunning = true;
+            
+            if (state.phase === 5) onReset();
+            
+            while (state.phase < 5) {
+                onNext();
+                await new Promise(r => setTimeout(r, state.speed));
+                if (!state.isRunning) break;
+            }
+            
+            state.isRunning = false;
+            updateDisplay();
+        }
+
+        function onReset() {
+            state.phase = 0;
+            state.measuredBits = [null, null];
+            state.bellState = '|?⟩';
+            state.fidelity = 0;
+            document.getElementById('results-section').classList.add('hidden');
+            handleStateChange();
+        }
+
+        // ===== EVENT LISTENERS =====
+        document.getElementById('state-select').addEventListener('change', handleStateChange);
+        document.getElementById('next-btn').addEventListener('click', onNext);
+        document.getElementById('auto-btn').addEventListener('click', onAuto);
+        document.getElementById('reset-btn').addEventListener('click', onReset);
+        document.getElementById('speed-select').addEventListener('change', (e) => {
+            state.speed = parseInt(e.target.value);
+        });
+
+        document.querySelectorAll('.noise-model-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.noise-model-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                state.noiseModel = this.dataset.model;
+                if (state.phase >= 5) onReset();
+            });
+        });
+
+        // ===== INITIALIZATION =====
+        handleStateChange();
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.width = Math.random() * 2 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.background = 'white';
+                star.style.borderRadius = '50%';
+                star.style.opacity = Math.random() * 0.7 + 0.3;
+                star.style.animation = `pulse ${Math.random() * 3 + 2}s ease-in-out infinite`;
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+    </script>
+</body>
+</html>
